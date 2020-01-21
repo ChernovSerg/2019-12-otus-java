@@ -8,6 +8,7 @@
     <modules>
         <module>L01-maven</module>
         <module>L02-shade</module>
+        <module>L01-DIYArrayList</module>
     </modules>
 
     <name>OtusJavaHW</name>
