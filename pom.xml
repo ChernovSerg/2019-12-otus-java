@@ -8,6 +8,7 @@
     <modules>
         <module>L01-maven</module>
         <module>L02-shade</module>
+        <module>L03-DIYArrayList</module>
     </modules>
 
     <name>OtusJavaHW</name>
@@ -34,6 +35,8 @@
         <com.google.guava.version>28.2-jre</com.google.guava.version>
         <spring-framework-bom.version>5.2.2.RELEASE</spring-framework-bom.version>
         <commons-io.version>2.6</commons-io.version>
+        <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
+
     </properties>
 
 
@@ -59,7 +62,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.11</version>
+                <version>4.12</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
