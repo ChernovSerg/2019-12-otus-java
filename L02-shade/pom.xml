@@ -46,6 +46,7 @@
                                     <mainClass>ru.otus.chernovsa.Main</mainClass>
                                 </transformer>
                             </transformers>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
                     </execution>
                 </executions>

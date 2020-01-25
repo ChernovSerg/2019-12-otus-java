@@ -22,73 +22,6 @@ public class DIYArrayList<T> implements List<T> {
         this.array = (T[]) new Object[capacity];
     }
 
-    private class DIYListIterator implements ListIterator<T> {
-        private int cursor = -1;
-        private T node;
-
-        DIYListIterator() {
-
-        }
-
-        @Override
-        public boolean hasNext() {
-            return  size > 0 && cursor < size;
-        }
-
-        @Override
-        public T next() {
-            if (hasNext()) {
-                return get(++cursor);
-            }
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void set(T t) {
-            if (cursor >= 0) {
-                DIYArrayList.this.set(cursor, t);
-            }
-        }
-
-        @Override
-        public void add(T t) {
-
-        }
-
-        @Override
-        public boolean hasPrevious() {
-            return false;
-        }
-
-        @Override
-        public T previous() {
-            return null;
-        }
-
-        @Override
-        public int nextIndex() {
-            return 0;
-        }
-
-        @Override
-        public int previousIndex() {
-            return 0;
-        }
-
-        @Override
-        public void remove() {
-
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void grow() {
-        capacity *= RESIZE_FACTOR;
-        T[] dest = (T[]) new Object[capacity];
-        System.arraycopy(array, 0, dest, 0, array.length);
-        this.array = dest;
-    }
-
     @Override
     public Iterator<T> iterator() {
         throw new UnsupportedOperationException();
@@ -225,4 +158,68 @@ public class DIYArrayList<T> implements List<T> {
     public List<T> subList(int fromIndex, int toIndex) {
         throw new UnsupportedOperationException();
     }
+
+    private class DIYListIterator implements ListIterator<T> {
+        private int cursor = -1;
+
+        @Override
+        public boolean hasNext() {
+            return size > 0 && cursor < size;
+        }
+
+        @Override
+        public T next() {
+            if (hasNext()) {
+                return get(++cursor);
+            }
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void set(T t) {
+            if (cursor >= 0) {
+                DIYArrayList.this.set(cursor, t);
+            }
+        }
+
+        @Override
+        public void add(T t) {
+
+        }
+
+        @Override
+        public boolean hasPrevious() {
+            return false;
+        }
+
+        @Override
+        public T previous() {
+            return null;
+        }
+
+        @Override
+        public int nextIndex() {
+            return 0;
+        }
+
+        @Override
+        public int previousIndex() {
+            return 0;
+        }
+
+        @Override
+        public void remove() {
+
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void grow() {
+        capacity *= RESIZE_FACTOR;
+        T[] dest = (T[]) new Object[capacity];
+        System.arraycopy(array, 0, dest, 0, array.length);
+        this.array = dest;
+    }
+
+
 }
