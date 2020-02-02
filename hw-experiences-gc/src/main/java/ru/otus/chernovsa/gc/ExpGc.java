@@ -5,7 +5,7 @@ import java.util.HashSet;
 public class ExpGc implements ExpGcMBean {
     private final int loopCounter;
     private volatile int size = 0;
-    private HashSet<Integer> integerHashSet;
+//    private HashSet<Integer> integerHashSet;
 
     public ExpGc(int loopCounter) {
         this.loopCounter = loopCounter;
@@ -20,7 +20,7 @@ public class ExpGc implements ExpGcMBean {
     public void setSize(int size) {
         System.out.println( "new size:" + size );
         this.size = size;
-        integerHashSet = new HashSet<>(this.size);
+//        integerHashSet = new HashSet<>(this.size*5);
     }
 
     void run() throws InterruptedException {
@@ -32,8 +32,8 @@ public class ExpGc implements ExpGcMBean {
             }
 //            Thread.sleep( 100 ); //Label_1
         }
-        for (int i = 0; i < this.size; i++) {
-            integerHashSet.add(Integer.valueOf(i));
-        }
+//        for (int i = 0; i < this.size*5; i++) {
+//            integerHashSet.add(Integer.valueOf(i));
+//        }
     }
 }

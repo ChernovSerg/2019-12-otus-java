@@ -89,7 +89,7 @@ public class GcDemo {
                     long startTime = info.getGcInfo().getStartTime();
                     long duration = info.getGcInfo().getDuration();
 
-                    System.out.println( "start:" + startTime + " Name:" + gcName + ", action:" + gcAction + ", gcCause:" + gcCause + "(" + duration + " ms)" );
+                    System.out.println( "start:" + startTime + " Name:" + gcName + ": action:" + gcAction + ": gcCause:" + gcCause + ":" + duration + ": ms" );
                 }
             };
             emitter.addNotificationListener( listener, null, null );
