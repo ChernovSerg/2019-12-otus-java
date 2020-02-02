@@ -35,6 +35,7 @@
  -XX:MaxGCPauseMillis=2
 при этом в коде создавал HashSet<Integer> из 25 млн элементов и заполнял её.
 Ошибка возникла на 245 секунде:
+ 
 [245.930s][info][gc] GC(662) Pause Full (Allocation Failure) 990M->990M(990M) 2543.405ms
  at ru.otus.chernovsa.gc.ExpGc.run(ExpGc.java:36)
  at ru.otus.chernovsa.gc.GcDemo.main(GcDemo.java:72)
