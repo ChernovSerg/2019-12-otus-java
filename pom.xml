@@ -10,6 +10,7 @@
         <module>L02-shade</module>
         <module>L03-DIYArrayList</module>
         <module>hw-experiences-gc</module>
+        <module>L04-class-loader-and-annotation</module>
     </modules>
 
     <name>OtusJavaHW</name>
