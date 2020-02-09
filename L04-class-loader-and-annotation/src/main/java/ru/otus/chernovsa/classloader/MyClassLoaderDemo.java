@@ -29,16 +29,12 @@ public class MyClassLoaderDemo {
 
     private static class MyClassLoader extends ClassLoader {
         Class<?> defineClass(String className) throws IOException {
-            File file = new File(getFileWithAnnotation(className));
+            File file = new File(getFile(className));
             byte[] bytecode = Files.readAllBytes(file.toPath());
             return super.defineClass(className, bytecode, 0, bytecode.length);
         }
 
-        String getFileWithAnnotation(String className) {
-            return "L04-class-loader-and-annotation/myClass/" + className.substring(className.lastIndexOf(".") + 1) + ".class";
-        }
-
-        String getFileWithoutAnnotation(String className) {
+        String getFile(String className) {
             return "L04-class-loader-and-annotation/myClass/" + className.substring(className.lastIndexOf(".") + 1) + ".class";
         }
 
