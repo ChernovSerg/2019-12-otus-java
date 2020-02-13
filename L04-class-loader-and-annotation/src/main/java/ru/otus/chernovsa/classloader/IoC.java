@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 public class IoC {
+    @SuppressWarnings("unchecked")
     static MyClassInterface createProxy(Class<? extends MyClassInterface> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         InvocationHandler handler = new DemoInvocationHandler(clazz.getConstructor().newInstance());
 
