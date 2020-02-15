@@ -11,6 +11,7 @@
         <module>L03-DIYArrayList</module>
         <module>hw-experiences-gc</module>
         <module>L04-class-loader-and-annotation</module>
+        <module>L05-myJUnit</module>
     </modules>
 
     <name>OtusJavaHW</name>
