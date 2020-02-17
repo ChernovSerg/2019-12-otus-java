@@ -9,7 +9,8 @@ public class Main {
         try {
             testRunner = new TestRunner(MyTest.class);
             testRunner.execute();
-            System.out.println(testRunner.getStatisticsToString());
+            TestStatistics testStatistic = testRunner.getTestStatistic();
+            System.out.println(testStatistic.getStatisticsToString());
         } catch (Exception e) {
             e.printStackTrace();
         }

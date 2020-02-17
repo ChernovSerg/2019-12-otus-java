@@ -4,86 +4,74 @@ import ru.otus.chernovsa.myjunit.annotation.After;
 import ru.otus.chernovsa.myjunit.annotation.Before;
 import ru.otus.chernovsa.myjunit.annotation.Test;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static ru.otus.chernovsa.myjunit.TestStatus.FAILED;
+import static ru.otus.chernovsa.myjunit.TestStatus.SUCCESSFULLY;
 
 public class TestRunner<T> {
     private Class<T> clazz;
-    private List<T> listInstances = new ArrayList<>();
-    private List<String> testMethods = new ArrayList<>();
-    private String beforeMethod;
-    private String afterMethod;
-    private Map<String, StatusTest> testStatistic = new TreeMap<>(String::compareTo);
+    private List<Method> testMethods = new ArrayList<>();
+    private Method beforeMethod;
+    private Method afterMethod;
+    private TestStatistics testStatistic = new TestStatistics();
 
-    enum StatusTest {SUCCESSFULLY, FAILED}
-
-    public TestRunner(Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public TestRunner(Class<T> clazz) throws TestRunnerException {
         this.clazz = clazz;
-        Constructor<T> constructor = clazz.getConstructor();
-        Method[] methods = clazz.getMethods();
-        for (Method method : methods) {
-            if (isMethodHasAnnotation(method, Test.class)) {
-                testMethods.add(method.getName());
-                listInstances.add(constructor.newInstance());
+
+        try {
+            Method[] methods = clazz.getMethods();
+            for (Method method : methods) {
+                if (method.getDeclaredAnnotation(Before.class) != null) {
+                    beforeMethod = method;
+                    continue;
+                }
+                if (method.getDeclaredAnnotation(Test.class) != null) {
+                    testMethods.add(method);
+                    continue;
+                }
+                if (method.getDeclaredAnnotation(After.class) != null) {
+                    afterMethod = method;
+                }
             }
-            if (isMethodHasAnnotation(method, Before.class)) {
-                beforeMethod = method.getName();
+            if (testMethods.size() == 0) {
+                System.err.println("Class " + clazz.getName() + " does not contain test methods.");
             }
-            if (isMethodHasAnnotation(method, After.class)) {
-                afterMethod = method.getName();
-            }
-        }
-        if (testMethods.size() == 0) {
-            System.err.println("Class " + clazz.getName() + " does not contain test methods.");
+        } catch (Exception e) {
+            throw new TestRunnerException("Что-то пошло не так при создании TestRunner", new Throwable(e.getMessage()));
         }
     }
 
     public void execute() {
-        for (int i = 0; i < listInstances.size(); i++) {
+        for (Method testMethod : testMethods) {
+            T instance = null;
             try {
-                Method method = clazz.getMethod(beforeMethod);
-                method.invoke(listInstances.get(i));
-                method = clazz.getMethod(testMethods.get(i));
-                method.invoke(listInstances.get(i));
-                method = clazz.getMethod(afterMethod);
-                method.invoke(listInstances.get(i));
-                testStatistic.put(testMethods.get(i), StatusTest.SUCCESSFULLY);
+                instance = clazz.getConstructor().newInstance();
             } catch (Exception e) {
-                testStatistic.put(testMethods.get(i), StatusTest.FAILED);
+                e.printStackTrace();
+            }
+            try {
+                System.out.println("----------------------------");
+                beforeMethod.invoke(instance);
+                testMethod.invoke(instance);
+                testStatistic.addTestResults(testMethod.getName(), SUCCESSFULLY);
+            } catch (Exception e) {
+                testStatistic.addTestResults(testMethod.getName(), FAILED);
+            } finally {
+                try {
+                    afterMethod.invoke(instance);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
-    public String getStatisticsToString() {
-        StringBuilder result = new StringBuilder();
-        result.append("====================\n");
-        result.append("Test results:\n");
-        result.append("====================\n");
-        result.append("All tests ").append(testMethods.size()).append("\n");
-        int successfully = Collections.frequency(testStatistic.values(), StatusTest.SUCCESSFULLY);
-        result.append("Successful tests - ").append(successfully).append("\n");
-        int failed = Collections.frequency(testStatistic.values(), StatusTest.FAILED);
-        result.append("Failed tests - ").append(failed).append("\n");
-        result.append("--------------------\n");
-        result.append("Detailed statistics:\n");
-        result.append("--------------------\n");
-        for (Map.Entry<String, StatusTest> entry : testStatistic.entrySet()) {
-            result.append(entry.getKey()).append(" - ").append(entry.getValue()).append("\n");
-        }
-        return result.toString();
-    }
-
-    private boolean isMethodHasAnnotation(Method method, Class<?> verifiableAnnotation) {
-        Annotation[] annotations = method.getAnnotations();
-        for (Annotation annotation : annotations) {
-            if (annotation.annotationType().getName().equals(verifiableAnnotation.getName())) {
-                return true;
-            }
-        }
-        return false;
+    public TestStatistics getTestStatistic() {
+        return testStatistic;
     }
 
 }

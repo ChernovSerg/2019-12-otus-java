@@ -30,13 +30,13 @@ public class MyTest {
     }
 
     @Test
-    public void test5() {
-        System.out.println("Execute test5.");
+    public void test5() throws Exception {
+        throw new Exception("Что-то пошло не так!");
     }
 
     @After
     public void after() {
-        System.out.println("Execute aftre.");
+        System.out.println("Execute after.");
     }
 
 
