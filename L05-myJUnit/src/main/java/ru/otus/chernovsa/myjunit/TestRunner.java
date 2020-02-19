@@ -25,15 +25,15 @@ public class TestRunner<T> {
         try {
             Method[] methods = clazz.getMethods();
             for (Method method : methods) {
-                if (method.getDeclaredAnnotation(Before.class) != null) {
+                if (method.isAnnotationPresent(Before.class)) {
                     beforeMethod = method;
                     continue;
                 }
-                if (method.getDeclaredAnnotation(Test.class) != null) {
+                if (method.isAnnotationPresent(Test.class)) {
                     testMethods.add(method);
                     continue;
                 }
-                if (method.getDeclaredAnnotation(After.class) != null) {
+                if (method.isAnnotationPresent(After.class)) {
                     afterMethod = method;
                 }
             }
