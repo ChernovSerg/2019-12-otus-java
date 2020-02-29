@@ -1,15 +1,14 @@
 package ru.otus.chernovsa.atm;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.internal.bytebuddy.implementation.bytecode.Throw;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import ru.otus.chernovsa.atm.money.Banknote;
 import ru.otus.chernovsa.atm.money.CurrencyCode;
 import ru.otus.chernovsa.atm.money.NominalValue;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
