@@ -2,6 +2,7 @@ package ru.otus.chernovsa.atm;
 
 import ru.otus.chernovsa.atm.money.Banknote;
 import ru.otus.chernovsa.atm.money.CurrencyCode;
+import ru.otus.chernovsa.atm.money.Money;
 import ru.otus.chernovsa.atm.money.NominalValue;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Atm {
+public class Atm implements Money {
     private List<CellOfMoney> cellsOfMoney = new ArrayList<>();
 
     //переменные для пользовательского сеанса
@@ -28,8 +29,33 @@ public class Atm {
         cellsOfMoney = new ArrayList<>(cells);
     }
 
+    @Override
+    //добавляет одну купюру в купюроприемник
+    public boolean addBanknote(Banknote banknote) {
+        this.usersBanknotes.add(banknote);
+        return true;
+    }
+
+    @Override
+    //можно удалять только купюры из купюроприемника
+    public boolean removeBanknote(NominalValue nominal) {
+        if (this.usersBanknotes.isEmpty()
+                || this.usersBanknotes.stream().noneMatch(banknote -> banknote.getNominal() == nominal)) {
+            return false;
+        }
+
+        for (int i = 0; i < usersBanknotes.size(); i++) {
+            if (usersBanknotes.get(i).getNominal() == nominal) {
+                usersBanknotes.remove(i);
+                break;
+            }
+        }
+        return true;
+    }
+
     //банкомат принимает только купюры одной и той же валюты
-    public boolean putMoneyToAtm(List<Banknote> banknotes) {
+    @Override
+    public boolean putMoney(List<Banknote> banknotes) {
         if (!isSameCurrency(banknotes)) {
             System.out.println("В пачке имеются купюры РАЗНЫХ валют. Можно положить только купюры одной валюты.");
             return false;
@@ -63,7 +89,7 @@ public class Atm {
         for (NominalValue nominalValue : groupedBanknotes.keySet()) {
             int idxCell = findCellIndexByNominalAndCurrency(nominalValue, groupedBanknotes.get(nominalValue).get(0).getCurrency());
             groupedBanknotes.get(nominalValue).forEach(banknote -> {
-                cellsOfMoney.get(idxCell).add(banknote);
+                cellsOfMoney.get(idxCell).addBanknote(banknote);
             });
         }
         //пополняем счет
@@ -113,6 +139,7 @@ public class Atm {
      * 1) не учитывается запрашиваемый код валюты
      * 2) не может быть несколько ячеек с одинаковым номиналом банкнот
      */
+    @Override
     public List<Banknote> takeMoney(int amount) throws Exception {
         List<Banknote> result = new ArrayList<>();
         //проверяем, а указан ли счет и имеется ли на нем запрашиваемая сумма
@@ -185,7 +212,7 @@ public class Atm {
     }
 
     private Integer getAtmBalance() {
-        return cellsOfMoney.stream().map(c1 -> c1.getNominalValue().getValue().intValue() * c1.getBookedElements())
+        return cellsOfMoney.stream().map(c1 -> c1.getNominalValue().getValue() * c1.getBookedElements())
                 .reduce(Integer::sum).get();
     }
 
@@ -207,10 +234,5 @@ public class Atm {
             }
         }
         return result;
-    }
-
-    private boolean isSameCurrency(List<Banknote> banknotes) {
-        Map<CurrencyCode, List<Banknote>> currencyCodeListMap = banknotes.stream().collect(Collectors.groupingBy(Banknote::getCurrency));
-        return currencyCodeListMap.keySet().size() == 1;
     }
 }

@@ -23,7 +23,6 @@ public enum NominalValue {
         return this.cost;
     }
 
-
     @Override
     public String toString() {
         return String.valueOf(cost);

@@ -21,23 +21,23 @@ public class CellOfMoneyTest {
         boolean result;
 
         Banknote banknoteUSD = new Banknote(NominalValue.FIVE, CurrencyCode.USD);
-        result = cell.add(banknoteUSD);
+        result = cell.addBanknote(banknoteUSD);
         assertThat(result).isFalse();
 
         Banknote banknoteOne = new Banknote(NominalValue.ONE, CurrencyCode.RUB);
-        result = cell.add(banknoteOne);
+        result = cell.addBanknote(banknoteOne);
         assertThat(result).isFalse();
         assertThat(cell.getFreeCapacity()).isEqualTo(cell.getSize());
 
         Banknote banknoteFive = new Banknote(NominalValue.FIVE, CurrencyCode.RUB);
-        result = cell.add(banknoteFive);
+        result = cell.addBanknote(banknoteFive);
         assertThat(result).isTrue();
         assertThat(cell.getFreeCapacity()).isEqualTo(cell.getSize() - 1);
 
-        assertThat(cell.add(banknoteFive)).isTrue();
-        assertThat(cell.add(banknoteFive)).isTrue();
+        assertThat(cell.addBanknote(banknoteFive)).isTrue();
+        assertThat(cell.addBanknote(banknoteFive)).isTrue();
 
-        assertThat(cell.add(banknoteFive)).isFalse();
+        assertThat(cell.addBanknote(banknoteFive)).isFalse();
         assertThat(cell.getFreeCapacity()).isEqualTo(0);
     }
 
@@ -45,29 +45,29 @@ public class CellOfMoneyTest {
     public void removeBanknote() {
         CellOfMoney cell = new CellOfMoney(NominalValue.FIVE, CurrencyCode.RUB, 3);
         Banknote banknoteFive = new Banknote(NominalValue.FIVE, CurrencyCode.RUB);
-        cell.add(banknoteFive);
-        cell.add(banknoteFive);
-        cell.add(banknoteFive);
+        cell.addBanknote(banknoteFive);
+        cell.addBanknote(banknoteFive);
+        cell.addBanknote(banknoteFive);
 
-        assertThat(cell.removeBanknote()).isTrue();
+        assertThat(cell.removeBanknote(NominalValue.FIVE)).isTrue();
         assertThat(cell.getFreeCapacity()).isEqualTo(1);
 
-        assertThat(cell.removeBanknote()).isTrue();
+        assertThat(cell.removeBanknote(NominalValue.FIVE)).isTrue();
         assertThat(cell.getFreeCapacity()).isEqualTo(2);
 
-        assertThat(cell.removeBanknote()).isTrue();
+        assertThat(cell.removeBanknote(NominalValue.FIVE)).isTrue();
         assertThat(cell.getFreeCapacity()).isEqualTo(3);
 
-        assertThat(cell.removeBanknote()).isFalse();
+        assertThat(cell.removeBanknote(NominalValue.FIVE)).isFalse();
     }
 
     @Test
     public void removeSomeBanknotes() {
         CellOfMoney cell = new CellOfMoney(NominalValue.FIVE, CurrencyCode.RUB, 3);
         Banknote banknoteFive = new Banknote(NominalValue.FIVE, CurrencyCode.RUB);
-        cell.add(banknoteFive);
-        cell.add(banknoteFive);
-        cell.add(banknoteFive);
+        cell.addBanknote(banknoteFive);
+        cell.addBanknote(banknoteFive);
+        cell.addBanknote(banknoteFive);
 
         assertThat(cell.removeBanknotes(2)).isTrue();
         assertThat(cell.getFreeCapacity()).isEqualTo(2);
