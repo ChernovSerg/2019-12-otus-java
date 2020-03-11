@@ -30,9 +30,9 @@ public class AtmTest {
     public void putMoneyToAtm() {
         Banknote banknote = new Banknote(NominalValue.ONE_HUNDRED, CurrencyCode.USD);
         banknotes.add(banknote);
-        assertThat(atm.putMoneyToAtm(banknotes)).isFalse();
+        assertThat(atm.putMoney(banknotes)).isFalse();
         banknotes.remove(banknote);
-        assertThat(atm.putMoneyToAtm(banknotes)).isTrue();
+        assertThat(atm.putMoney(banknotes)).isTrue();
     }
 
     @Test
@@ -41,7 +41,7 @@ public class AtmTest {
 
         Banknote banknote = new Banknote(NominalValue.ONE_THOUSAND, CurrencyCode.RUB);
         banknotes.add(banknote);
-        atm.putMoneyToAtm(banknotes);
+        atm.putMoney(banknotes);
         assertThat(atm.checkFreeSpaceInCells()).isFalse();
 
         atm.exit();
@@ -50,12 +50,12 @@ public class AtmTest {
         List<Banknote> banknoteList = Arrays.asList(banknote2, banknote2, banknote2, banknote2, banknote2,
                 banknote2, banknote2, banknote2, banknote2, banknote2, banknote2, banknote2);
         banknotes.addAll(banknoteList);
-        atm.putMoneyToAtm(banknotes);
+        atm.putMoney(banknotes);
         assertThat(atm.checkFreeSpaceInCells()).isFalse();
 
         atm.exit();
         banknotes.removeAll(banknoteList);
-        atm.putMoneyToAtm(banknotes);
+        atm.putMoney(banknotes);
         assertThat(atm.checkFreeSpaceInCells()).isTrue();
     }
 
@@ -75,7 +75,7 @@ public class AtmTest {
     public void transferMoneyToAccount() {
         Account acc = new Account();
         assertThat(atm.transferMoneyToAccount()).isFalse();
-        atm.putMoneyToAtm(banknotes);
+        atm.putMoney(banknotes);
         assertThat(atm.transferMoneyToAccount()).isFalse();
         atm.enterAccountNumber(acc);
         assertThat(atm.transferMoneyToAccount()).isTrue();
@@ -102,7 +102,7 @@ public class AtmTest {
         takeMoney = atm.takeMoney(5);
         assertThat(takeMoney.isEmpty()).isTrue();
 
-        atm.putMoneyToAtm(banknotes);
+        atm.putMoney(banknotes);
         assertThat(atm.transferMoneyToAccount()).isTrue();
 
         //пробуем снять денег больше, чем есть их в банкомате
