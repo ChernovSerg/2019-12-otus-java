@@ -1,32 +1,11 @@
-package ru.otus.chernovsa.myjsonwriter;
-
-import com.google.gson.Gson;
+package ru.otus.chernovsa.myjsonwriter.demo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class Demo {
-    public static void main(String[] args) throws IllegalAccessException {
-        Person p = new Person();
-        System.out.println("    p: " + p);
-
-        MyJsonWriter myJsonWriter = new MyJsonWriter();
-        myJsonWriter.parse(p);
-        String json = myJsonWriter.toJSON();
-
-        Gson gson = new Gson();
-        Person clone = gson.fromJson(json, Person.class);
-        System.out.println("clone: " + clone);
-        System.out.println("json: " + json);
-
-        System.out.println("-----");
-        System.out.println("p == clone: " + p.equals(clone));
-    }
-}
-
-class Person {
+public class Person {
     private OtherObj other;
     private Integer[] ints;
     private double[] dbls = new double[2];
@@ -113,71 +92,6 @@ class Person {
                 + ", strings=" + Arrays.toString(strings)
                 + ", ch=" + ch
                 + "}\n";
-    }
-}
-
-class OtherObj {
-    private String str;
-    private Integer k;
-    private Other2 other2 = new Other2();
-
-    public OtherObj(String str, Integer k) {
-        this.str = str;
-        this.k = k;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OtherObj)) return false;
-        OtherObj otherObj = (OtherObj) o;
-        return Objects.equals(str, otherObj.str) &&
-                Objects.equals(k, otherObj.k) &&
-                Objects.equals(other2, otherObj.other2);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(str, k, other2);
-    }
-
-    @Override
-    public String toString() {
-        return "OtherObj{"
-                + " str='" + str + '\''
-                + ", k=" + k
-                + ", other2=" + other2
-                + '}';
-    }
-}
-
-class Other2 {
-    private int n = 5;
-    private boolean flag = true;
-    List<Integer> list = Arrays.asList(1, 2, 3);
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Other2)) return false;
-        Other2 other2 = (Other2) o;
-        return n == other2.n &&
-                flag == other2.flag &&
-                list.equals(other2.list);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(n, flag, list);
-    }
-
-    @Override
-    public String toString() {
-        return "Other2{"
-                + " n=" + n
-                + ", flag=" + flag
-                + ", list=" + list
-                + '}';
     }
 }
 
