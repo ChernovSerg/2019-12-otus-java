@@ -93,7 +93,7 @@ public class MyJsonWriter {
         }
 
         if (FieldType.OBJECT.equals(field.type)) {
-            return fldJson.append(ObjectToString(field.value)).toString();
+            return fldJson.append(objectToString(field.value)).toString();
         }
 
         if (FieldType.STRING.equals(field.type)) {
@@ -107,17 +107,17 @@ public class MyJsonWriter {
         }
 
         if (FieldType.ARRAY.equals(field.type)) {
-            return fldJson.append(ArrayToJson(field.value)).toString();
+            return fldJson.append(arrayToJson(field.value)).toString();
         }
 
         if (FieldType.COLLECTION.equals(field.type)) {
-            return fldJson.append(CollectToJson(field.value)).toString();
+            return fldJson.append(collectToJson(field.value)).toString();
         }
 
         return fldJson.toString();
     }
 
-    private String ArrayToJson(Object objects) throws IllegalAccessException {
+    private String arrayToJson(Object objects) throws IllegalAccessException {
         StringBuilder result = new StringBuilder();
         result.append("[");
         int length = Array.getLength(objects);
@@ -134,13 +134,13 @@ public class MyJsonWriter {
         return result.toString();
     }
 
-    private String CollectToJson(Object obj) throws IllegalAccessException {
+    private String collectToJson(Object obj) throws IllegalAccessException {
         List<Object> values = (List<Object>) obj;
         Object[] objects = values.toArray();
-        return ArrayToJson(objects);
+        return arrayToJson(objects);
     }
 
-    private String ObjectToString(Object obj) throws IllegalAccessException {
+    private String objectToString(Object obj) throws IllegalAccessException {
         StringBuilder result = new StringBuilder();
         result.append("{");
         List<Triple> flds = parseInternal(obj);
