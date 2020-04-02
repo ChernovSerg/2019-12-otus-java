@@ -7,6 +7,8 @@ enum FieldType {
     DOUBLE,
     BOOLEAN,
     NULL,
-    COLLECTION,
+    LIST,
+    QUEUE,
+    SET,
     ARRAY
 }

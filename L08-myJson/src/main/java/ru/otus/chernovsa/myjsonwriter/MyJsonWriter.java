@@ -22,10 +22,11 @@ public class MyJsonWriter {
         if (object == null) {
             return "null";
         }
-        boolean rootIsObj = getFieldType(object).equals(FieldType.OBJECT);
+        FieldType rootType = getFieldType(object);
+        boolean rootIsObj = rootType.equals(FieldType.OBJECT);
         StringBuilder result = new StringBuilder();
         result.append(rootIsObj ? "{" : "");
-        List<Triple> parsed = new ArrayList<>(parseInternal(object));
+        List<Triple> parsed = new ArrayList<>(parseInternal(object, rootType));
         for (int i = 0; i < parsed.size(); i++) {
             Triple triple = parsed.get(i);
             result.append(rootIsObj ? "\"" + triple.name + "\":" : "");
@@ -38,13 +39,12 @@ public class MyJsonWriter {
         return result.toString();
     }
 
-    private List<Triple> parseInternal(Object object) throws IllegalAccessException {
+    private List<Triple> parseInternal(Object object, FieldType rootType) throws IllegalAccessException {
         List<Triple> objects = new ArrayList<>();
         if (object == null) {
             objects.add(new Triple("", FieldType.NULL, null));
         }
-        FieldType fieldType = getFieldType(object);
-        if (FieldType.OBJECT.equals(fieldType)) {
+        if (FieldType.OBJECT.equals(rootType)) {
             Class<?> clazz = object.getClass();
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
@@ -54,7 +54,7 @@ public class MyJsonWriter {
                 objects.add(new Triple(field.getName(), fldType, val));
             }
         } else {
-            objects.add(new Triple(fieldType.name(), fieldType, object));
+            objects.add(new Triple(rootType.name(), rootType, object));
         }
         return objects;
     }
@@ -75,8 +75,12 @@ public class MyJsonWriter {
             result = FieldType.INTEGER;
         } else if (Float.class.isAssignableFrom(fieldType) || Double.class.isAssignableFrom(fieldType)) {
             result = FieldType.DOUBLE;
+        } else if(Queue.class.isAssignableFrom(fieldType)) {
+            result = FieldType.QUEUE;
+        } else if(Set.class.isAssignableFrom(fieldType)) {
+            result = FieldType.SET;
         } else if (Collection.class.isAssignableFrom(fieldType)) {
-            result = FieldType.COLLECTION;
+            result = FieldType.LIST;
         } else if (fieldType.isArray()) {
             result = FieldType.ARRAY;
         } else {
@@ -110,8 +114,16 @@ public class MyJsonWriter {
             return fldJson.append(arrayToJson(field.value)).toString();
         }
 
-        if (FieldType.COLLECTION.equals(field.type)) {
-            return fldJson.append(collectToJson(field.value)).toString();
+        if (FieldType.LIST.equals(field.type)) {
+            return fldJson.append(listToJson(field.value)).toString();
+        }
+
+        if (FieldType.QUEUE.equals(field.type)) {
+            return fldJson.append(queueToJson(field.value)).toString();
+        }
+
+        if (FieldType.SET.equals(field.type)) {
+            return fldJson.append(setToJson(field.value)).toString();
         }
 
         return fldJson.toString();
@@ -134,24 +146,26 @@ public class MyJsonWriter {
         return result.toString();
     }
 
-    private String collectToJson(Object obj) throws IllegalAccessException {
+    private String listToJson(Object obj) throws IllegalAccessException {
         List<Object> values = (List<Object>) obj;
         Object[] objects = values.toArray();
         return arrayToJson(objects);
     }
 
+    private String queueToJson(Object obj) throws IllegalAccessException {
+        Queue<Object> values = (Queue<Object>) obj;
+        Object[] objects = values.toArray();
+        return arrayToJson(objects);
+    }
+
+    private String setToJson(Object obj) throws IllegalAccessException {
+        Set<Object> values = (Set<Object>) obj;
+        Object[] objects = values.toArray();
+        return arrayToJson(objects);
+    }
+
     private String objectToString(Object obj) throws IllegalAccessException {
-        StringBuilder result = new StringBuilder();
-        result.append("{");
-        List<Triple> flds = parseInternal(obj);
-        for (int i = 0; i < flds.size(); i++) {
-            result.append("\"").append(flds.get(i).name).append("\":");
-            result.append(fieldToJson(flds.get(i)));
-            if (i < flds.size() - 1) {
-                result.append(",");
-            }
-        }
-        return result.append("}").toString();
+        return toJSON(obj);
     }
 
 }

@@ -1,15 +1,13 @@
 package ru.otus.chernovsa.myjsonwriter.demo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Person {
+    private Set<String> addresses = new HashSet<>();
+    private Queue<String> queue = new PriorityQueue<>();
     private OtherObj other;
     private Integer[] ints;
     private double[] dbls = new double[2];
-    private List<String> addresses = new ArrayList<>();
     private List<OtherObj> others = new ArrayList<>();
     private int age;
     private boolean sex;
@@ -33,6 +31,8 @@ public class Person {
         addresses.add("Khimki, Mashintseva, 9 , 2");
         addresses.add(null);
         addresses.add("Moscow, Solovjinaya roscha, 1 , 25");
+        queue.add("element1");
+        queue.add("element2");
         money = 7000D;
         strings[0] = "qwe";
         strings[1] = "asd";
@@ -78,10 +78,11 @@ public class Person {
     @Override
     public String toString() {
         return "Person{"
-                + " other=" + other
+                + " addresses=" + addresses
+                + ", queue=" + queue
+                + ", other=" + other
                 + ", ints=" + Arrays.toString(ints)
                 + ", dbls=" + Arrays.toString(dbls)
-                + ", addresses=" + addresses
                 + ", others=" + others
                 + ", age=" + age
                 + ", sex=" + sex
@@ -91,7 +92,7 @@ public class Person {
                 + ", money=" + money
                 + ", strings=" + Arrays.toString(strings)
                 + ", ch=" + ch
-                + "}\n";
+                + '}';
     }
 }
 
