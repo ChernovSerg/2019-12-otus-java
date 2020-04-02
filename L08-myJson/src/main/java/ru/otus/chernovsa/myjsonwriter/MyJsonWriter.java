@@ -79,7 +79,7 @@ public class MyJsonWriter {
             result = FieldType.QUEUE;
         } else if(Set.class.isAssignableFrom(fieldType)) {
             result = FieldType.SET;
-        } else if (Collection.class.isAssignableFrom(fieldType)) {
+        } else if (List.class.isAssignableFrom(fieldType)) {
             result = FieldType.LIST;
         } else if (fieldType.isArray()) {
             result = FieldType.ARRAY;
