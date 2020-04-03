@@ -18,6 +18,7 @@ class IoC {
 
     private static class DemoInvocationHandler<T> implements InvocationHandler {
         private final T myClass;
+        //TODO доработать так, чтобы не надо было каждый раз шерстить аннотации метода
 
         DemoInvocationHandler(T instance) {
             this.myClass = instance;

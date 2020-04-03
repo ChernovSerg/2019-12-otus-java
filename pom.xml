@@ -12,6 +12,7 @@
         <module>hw-experiences-gc</module>
         <module>L04-class-loader-and-annotation</module>
         <module>L05-myJUnit</module>
+        <module>L06-ATM</module>
     </modules>
 
     <name>OtusJavaHW</name>
