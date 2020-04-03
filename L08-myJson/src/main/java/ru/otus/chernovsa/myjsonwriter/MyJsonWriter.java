@@ -75,12 +75,8 @@ public class MyJsonWriter {
             result = FieldType.INTEGER;
         } else if (Float.class.isAssignableFrom(fieldType) || Double.class.isAssignableFrom(fieldType)) {
             result = FieldType.DOUBLE;
-        } else if(Queue.class.isAssignableFrom(fieldType)) {
-            result = FieldType.QUEUE;
-        } else if(Set.class.isAssignableFrom(fieldType)) {
-            result = FieldType.SET;
-        } else if (List.class.isAssignableFrom(fieldType)) {
-            result = FieldType.LIST;
+        } else if (Collection.class.isAssignableFrom(fieldType)) {
+            result = FieldType.COLLECTION;
         } else if (fieldType.isArray()) {
             result = FieldType.ARRAY;
         } else {
@@ -114,16 +110,8 @@ public class MyJsonWriter {
             return fldJson.append(arrayToJson(field.value)).toString();
         }
 
-        if (FieldType.LIST.equals(field.type)) {
-            return fldJson.append(listToJson(field.value)).toString();
-        }
-
-        if (FieldType.QUEUE.equals(field.type)) {
-            return fldJson.append(queueToJson(field.value)).toString();
-        }
-
-        if (FieldType.SET.equals(field.type)) {
-            return fldJson.append(setToJson(field.value)).toString();
+        if (FieldType.COLLECTION.equals(field.type)) {
+            return fldJson.append(collectionToJson(field.value)).toString();
         }
 
         return fldJson.toString();
@@ -146,20 +134,8 @@ public class MyJsonWriter {
         return result.toString();
     }
 
-    private String listToJson(Object obj) throws IllegalAccessException {
-        List<Object> values = (List<Object>) obj;
-        Object[] objects = values.toArray();
-        return arrayToJson(objects);
-    }
-
-    private String queueToJson(Object obj) throws IllegalAccessException {
-        Queue<Object> values = (Queue<Object>) obj;
-        Object[] objects = values.toArray();
-        return arrayToJson(objects);
-    }
-
-    private String setToJson(Object obj) throws IllegalAccessException {
-        Set<Object> values = (Set<Object>) obj;
+    private String collectionToJson(Object obj) throws IllegalAccessException {
+        Collection<Object> values = (Collection<Object>) obj;
         Object[] objects = values.toArray();
         return arrayToJson(objects);
     }
