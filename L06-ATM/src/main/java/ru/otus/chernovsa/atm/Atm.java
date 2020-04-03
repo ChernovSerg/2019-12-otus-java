@@ -2,8 +2,8 @@ package ru.otus.chernovsa.atm;
 
 import ru.otus.chernovsa.atm.money.Banknote;
 import ru.otus.chernovsa.atm.money.CurrencyCode;
-import ru.otus.chernovsa.atm.money.Money;
 import ru.otus.chernovsa.atm.money.NominalValue;
+import ru.otus.chernovsa.atm.money.PutTakeMoney;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Atm implements Money {
+public class Atm implements PutTakeMoney {
     private List<CellOfMoney> cellsOfMoney = new ArrayList<>();
 
     //переменные для пользовательского сеанса
@@ -88,9 +88,7 @@ public class Atm implements Money {
         Map<NominalValue, List<Banknote>> groupedBanknotes = usersBanknotes.stream().collect(Collectors.groupingBy(Banknote::getNominal));
         for (NominalValue nominalValue : groupedBanknotes.keySet()) {
             int idxCell = findCellIndexByNominalAndCurrency(nominalValue, groupedBanknotes.get(nominalValue).get(0).getCurrency());
-            groupedBanknotes.get(nominalValue).forEach(banknote -> {
-                cellsOfMoney.get(idxCell).addBanknote(banknote);
-            });
+            groupedBanknotes.get(nominalValue).forEach(banknote -> cellsOfMoney.get(idxCell).addBanknote(banknote));
         }
         //пополняем счет
         Integer amount = usersBanknotes.stream().map(Banknote::getCost).reduce(Integer::sum).get();

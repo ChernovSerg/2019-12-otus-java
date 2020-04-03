@@ -13,6 +13,8 @@
         <module>L04-class-loader-and-annotation</module>
         <module>L05-myJUnit</module>
         <module>L06-ATM</module>
+        <module>L07-ATM_v2</module>
+        <module>L08-myJson</module>
     </modules>
 
     <name>OtusJavaHW</name>

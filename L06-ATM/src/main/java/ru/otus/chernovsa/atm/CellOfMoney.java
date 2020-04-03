@@ -2,13 +2,13 @@ package ru.otus.chernovsa.atm;
 
 import ru.otus.chernovsa.atm.money.Banknote;
 import ru.otus.chernovsa.atm.money.CurrencyCode;
-import ru.otus.chernovsa.atm.money.Money;
 import ru.otus.chernovsa.atm.money.NominalValue;
+import ru.otus.chernovsa.atm.money.PutTakeMoney;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CellOfMoney implements Money {
+public class CellOfMoney implements PutTakeMoney {
     private static final int DEFAULT_SIZE_OF_CELL = 10;
 
     private final NominalValue nominalValue;
