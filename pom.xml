@@ -15,6 +15,7 @@
         <module>L06-ATM</module>
         <module>L07-ATM_v2</module>
         <module>L08-myJson</module>
+        <module>L09-myORM</module>
     </modules>
 
     <name>OtusJavaHW</name>
