@@ -1,13 +1,14 @@
 package ru.otus.chernovsa.core.dao;
 
+import ru.otus.chernovsa.core.model.User;
 import ru.otus.chernovsa.core.sessionmanager.SessionManager;
 
 import java.util.Optional;
 
-public interface ObjectDao {
-    long saveObject(Object object);
+public interface UserDao {
+    long saveUser(User object);
 
-    <T> Optional<T> findById(long id);
+    Optional<User> findById(long id);
 
     SessionManager getSessionManager();
 }

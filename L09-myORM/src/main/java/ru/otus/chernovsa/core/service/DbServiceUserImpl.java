@@ -2,29 +2,30 @@ package ru.otus.chernovsa.core.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.chernovsa.core.dao.ObjectDao;
+import ru.otus.chernovsa.core.dao.UserDao;
+import ru.otus.chernovsa.core.model.User;
 import ru.otus.chernovsa.core.sessionmanager.SessionManager;
 
 import java.util.Optional;
 
-public class DbServiceObjectImpl implements DBServiceObject {
-    private static Logger logger = LoggerFactory.getLogger(DbServiceObjectImpl.class);
+public class DbServiceUserImpl implements DbServiceUser {
+    private static Logger logger = LoggerFactory.getLogger(DbServiceUserImpl.class);
 
-    private final ObjectDao objectDao;
+    private final UserDao userDao;
 
-    public DbServiceObjectImpl(ObjectDao objectDao) {
-        this.objectDao = objectDao;
+    public DbServiceUserImpl(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     @Override
-    public long saveObject(Object object) {
-        try (SessionManager sessionManager = objectDao.getSessionManager()) {
+    public long saveUser(User object) {
+        try (SessionManager sessionManager = userDao.getSessionManager()) {
             sessionManager.beginSession();
             try {
-                long userId = objectDao.saveObject(object);
+                long userId = userDao.saveUser(object);
                 sessionManager.commitSession();
 
-                logger.info("created object: {}", userId);
+                logger.info("created User with ID: {}", userId);
                 return userId;
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
@@ -36,12 +37,12 @@ public class DbServiceObjectImpl implements DBServiceObject {
 
 
     @Override
-    public <T> Optional<T> getObject(long id, Class<T> clazz) {
-        try (SessionManager sessionManager = objectDao.getSessionManager()) {
+    public Optional<User> getUser(long id) {
+        try (SessionManager sessionManager = userDao.getSessionManager()) {
             sessionManager.beginSession();
             try {
-                Optional<T> userOptional = objectDao.findById(id);
-                logger.info("object: {}", userOptional.orElse(null));
+                Optional<User> userOptional = userDao.findById(id);
+                logger.info("found User: {}", userOptional.orElse(null));
                 return userOptional;
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);

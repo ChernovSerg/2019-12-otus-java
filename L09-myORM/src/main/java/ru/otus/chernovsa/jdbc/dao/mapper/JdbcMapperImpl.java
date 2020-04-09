@@ -1,5 +1,7 @@
-package ru.otus.chernovsa.jdbc.dao;
+package ru.otus.chernovsa.jdbc.dao.mapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.otus.chernovsa.core.dao.Id;
 import ru.otus.chernovsa.core.dao.JdbcMapper;
 import ru.otus.chernovsa.core.dao.JdbcMapperException;
@@ -10,88 +12,94 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static ru.otus.chernovsa.jdbc.dao.mapper.SqlRequestType.INSERT_ALL_FIELDS;
+import static ru.otus.chernovsa.jdbc.dao.mapper.SqlRequestType.SELECT_ALL_FIELDS_BY_ID;
 
 public class JdbcMapperImpl implements JdbcMapper {
+    private static Logger logger = LoggerFactory.getLogger(JdbcMapperImpl.class);
+    private final ObjectMetadata metadata = new ObjectMetadata();
+    private Map<SqlRequestType, String> sqlRequests = new HashMap<>();
 
     @Override
     public String getSqlInsert(Object object) throws JdbcMapperException {
+        if (hasRequest(INSERT_ALL_FIELDS)) {
+            return sqlRequests.get(INSERT_ALL_FIELDS);
+        }
+
         StringBuilder result = new StringBuilder();
         String objName;
-        List<Map<Field, Object>> fields = new ArrayList<>();
-
         if (object == null) {
             return result.toString();
         }
         objName = object.getClass().getName().substring(object.getClass().getName().lastIndexOf('.') + 1);
-        fields = parseObject(object);
-
+        initMetadata(object);
+        List<String> fieldsForInsert = metadata.getFieldsForInsert().stream().map(Field::getName).collect(Collectors.toList());
         result.append("insert into ").append(objName).append("(");
-        for (Map<Field, Object> field : fields) {
-            Field fld = (Field) field.keySet().toArray()[0];
-            result.append(fld.getName()).append(",");
+        for (String filed : fieldsForInsert) {
+            result.append(filed).append(",");
         }
         result.deleteCharAt(result.length() - 1).append(") values (");
-        for (int i = 0; i < fields.size(); i++) {
-            result.append("?,");
-        }
+        result.append("?,".repeat(fieldsForInsert.size()));
         result.deleteCharAt(result.length() - 1).append(")");
+        sqlRequests.put(INSERT_ALL_FIELDS, result.toString());
         return result.toString();
     }
 
     @Override
     public List<String> getParamsForInsert(Object object) throws JdbcMapperException {
         List<String> result = new ArrayList<>();
-        List<Map<Field, Object>> fields = new ArrayList<>();
-
         if (object == null) {
             return result;
         }
-        fields = parseObject(object);
-        for (Map<Field, Object> field : fields) {
-            Field fld = (Field) field.keySet().toArray()[0];
-            Class<?> clazz = null;
+        initMetadata(object);
+        List<Field> fields = metadata.getFieldsForInsert();
+        for (Field field : fields) {
             try {
-                clazz = fld.get(object).getClass();
+                Class<?> clazz = field.get(object).getClass();
+                assert clazz != null;
+                String val = field.get(object).toString();
+                if (Byte.class.isAssignableFrom(clazz) || Short.class.isAssignableFrom(clazz)
+                        || Integer.class.isAssignableFrom(clazz) || Long.class.isAssignableFrom(clazz)
+                        || Float.class.isAssignableFrom(clazz) || Double.class.isAssignableFrom(clazz)
+                        || Boolean.class.isAssignableFrom(clazz)
+                ) {
+                    result.add(val);
+                } else {
+                    result.add("\"" + val + "\"");
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
-            assert clazz != null;
-            if (Byte.class.isAssignableFrom(clazz) || Short.class.isAssignableFrom(clazz)
-                    || Integer.class.isAssignableFrom(clazz) || Long.class.isAssignableFrom(clazz)
-                    || Float.class.isAssignableFrom(clazz) || Double.class.isAssignableFrom(clazz)
-                    || Boolean.class.isAssignableFrom(clazz)
-            ) {
-                result.add(field.get(fld).toString());
-            } else {
-                result.add("\"" + field.get(fld).toString() + "\"");
-            }
         }
+        logger.info("list params for insert: {}", result);
         return result;
     }
 
     @Override
     public String getSqlSelect(Class<?> clazz) throws JdbcMapperException {
-        StringBuilder result = new StringBuilder();
-        String objName;
-        List<Map<Field, Object>> fields = new ArrayList<>();
+        if (hasRequest(SELECT_ALL_FIELDS_BY_ID)) {
+            return sqlRequests.get(SELECT_ALL_FIELDS_BY_ID);
+        }
 
-        Object object = null;
+        StringBuilder result = new StringBuilder();
         try {
-            object = clazz.getConstructor().newInstance();
+            initMetadata(clazz.getConstructor().newInstance());
         } catch (Exception e) {
             throw new JdbcMapperException(e.getMessage(), e);
         }
-        objName = object.getClass().getName().substring(object.getClass().getName().lastIndexOf('.') + 1);
-        fields = parseObject(object);
-
-        String fieldWithIdAnnotation = getFieldNameWithIdAnnotation(object);
-        result.append("select ").append(fieldWithIdAnnotation).append(",");
-        for (Map<Field, Object> field : fields) {
-            Field fld = (Field) field.keySet().toArray()[0];
-            result.append(fld.getName()).append(",");
+        List<Field> fields = metadata.getFields();
+        result.append("select ");
+        for (Field field : fields) {
+            result.append(field.getName()).append(",");
         }
-        result.deleteCharAt(result.length() - 1).append(" from ").append(objName)
-                .append(" where ").append(fieldWithIdAnnotation).append(" = ?");
+        result.deleteCharAt(result.length() - 1).append(" from ")
+                .append(metadata.getObjName())
+                .append(" where ")
+                .append(metadata.getFieldWithIdAnnotation().getName())
+                .append(" = ?");
+        sqlRequests.put(SELECT_ALL_FIELDS_BY_ID, result.toString());
         return result.toString();
     }
 
@@ -100,56 +108,22 @@ public class JdbcMapperImpl implements JdbcMapper {
         T returnObj;
         try {
             returnObj = (T) clazz.getConstructor().newInstance();
-            Field[] fieldsObject = getObjectFields(returnObj);
-            Class<?> aClass = returnObj.getClass();
-            for (int i = 0; i < fieldsObject.length; i++) {
-                String fldName = fieldsObject[i].getName();
-                Field field = aClass.getDeclaredField(fldName);
-                field.setAccessible(true);
+            initMetadata(returnObj);
+            List<Field> fields = metadata.getFields();
+            for (Field field : fields) {
+                String fldName = field.getName();
                 Object val = rs.getObject(fldName);
                 if (BigDecimal.class.isAssignableFrom(val.getClass())) {
                     val = ((BigDecimal) val).doubleValue();
                 }
+                field.setAccessible(true);
                 field.set(returnObj, val);
             }
         } catch (InstantiationException | InvocationTargetException | NoSuchMethodException
-                | IllegalAccessException | NoSuchFieldException | SQLException e) {
+                | IllegalAccessException | SQLException e) {
             throw new JdbcMapperException(e.getMessage(), e);
         }
         return Optional.ofNullable(returnObj);
-    }
-
-    private Field[] getObjectFields(Object object) throws JdbcMapperException {
-        Field[] fields = new Field[object.getClass().getDeclaredFields().length];
-        List<Map<Field, Object>> flds = parseObject(object);
-        for (int i = 0; i < flds.size(); i++) {
-            fields[i + 1] = (Field) flds.get(i).keySet().toArray()[0];
-        }
-        Field annot = getFieldWithIdAnnotation(object);
-        fields[0] = annot;
-        return fields;
-    }
-
-    private String getFieldNameWithIdAnnotation(Object object) {
-        Class<?> clazz = object.getClass();
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            if (field.isAnnotationPresent(Id.class)) {
-                return field.getName();
-            }
-        }
-        return null;
-    }
-
-    private Field getFieldWithIdAnnotation(Object object) {
-        Class<?> clazz = object.getClass();
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            if (field.isAnnotationPresent(Id.class)) {
-                return field;
-            }
-        }
-        return null;
     }
 
     /**
@@ -165,14 +139,13 @@ public class JdbcMapperImpl implements JdbcMapper {
         Class<?> clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            if (field.isAnnotationPresent(Id.class) && numIdAnnotation < 1) {
+            field.setAccessible(true);
+            if (field.isAnnotationPresent(Id.class)) {
                 numIdAnnotation++;
                 if (numIdAnnotation > 1) {
                     throw new JdbcMapperException("Объект содержит больше 1 поля с аннотацие Id.");
                 }
-                continue;
             }
-            field.setAccessible(true);
             try {
                 Object val = field.get(object);
                 if (!isPrimitiveField(val.getClass())) {
@@ -194,5 +167,21 @@ public class JdbcMapperImpl implements JdbcMapper {
         return Number.class.isAssignableFrom(clazz) || String.class.isAssignableFrom(clazz)
                 || Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)
                 || Boolean.class.isAssignableFrom(clazz) || boolean.class.isAssignableFrom(clazz);
+    }
+
+    private void initMetadata(Object object) throws JdbcMapperException {
+        if (metadata.getFields() == null) {
+            metadata.setObjName(object.getClass().getName().substring(object.getClass().getName().lastIndexOf('.') + 1));
+            metadata.setFields(parseObject(object));
+        }
+    }
+
+    private boolean hasRequest(SqlRequestType requestType) {
+        for (SqlRequestType sqlRequestType : sqlRequests.keySet()) {
+            if (requestType.equals(sqlRequestType)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

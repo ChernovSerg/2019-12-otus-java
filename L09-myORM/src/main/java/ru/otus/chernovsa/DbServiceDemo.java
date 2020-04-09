@@ -2,16 +2,19 @@ package ru.otus.chernovsa;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.chernovsa.core.dao.JdbcMapper;
-import ru.otus.chernovsa.core.dao.ObjectDao;
+import ru.otus.chernovsa.core.dao.AccountDao;
+import ru.otus.chernovsa.core.dao.UserDao;
 import ru.otus.chernovsa.core.model.Account;
 import ru.otus.chernovsa.core.model.User;
-import ru.otus.chernovsa.core.service.DBServiceObject;
-import ru.otus.chernovsa.core.service.DbServiceObjectImpl;
+import ru.otus.chernovsa.core.service.DbServiceAccount;
+import ru.otus.chernovsa.core.service.DbServiceAccountImpl;
+import ru.otus.chernovsa.core.service.DbServiceUser;
+import ru.otus.chernovsa.core.service.DbServiceUserImpl;
 import ru.otus.chernovsa.h2.DataSourceH2;
 import ru.otus.chernovsa.jdbc.DbExecutor;
-import ru.otus.chernovsa.jdbc.dao.JdbcMapperImpl;
+import ru.otus.chernovsa.jdbc.dao.AccountDaoJdbc;
 import ru.otus.chernovsa.jdbc.dao.ObjectDaoJdbc;
+import ru.otus.chernovsa.jdbc.dao.UserDaoJdbc;
 import ru.otus.chernovsa.jdbc.sessionmanager.SessionManagerJdbc;
 
 import javax.sql.DataSource;
@@ -33,33 +36,44 @@ public class DbServiceDemo {
         demo.createTable(dataSource);
 
         SessionManagerJdbc sessionManager = new SessionManagerJdbc(dataSource);
-        DbExecutor<User> dbExecutorForUser = new DbExecutor<>();
-        JdbcMapper jdbcMapper = new JdbcMapperImpl();
 
         //User
+        DbExecutor<User> dbExecutorForUser = new DbExecutor<>();
         System.out.println();
-        ObjectDao<User> userDao = new ObjectDaoJdbc<>(sessionManager, dbExecutorForUser, jdbcMapper, User.class);
-        DBServiceObject dbServiceUser = new DbServiceObjectImpl(userDao);
+        UserDao userDao =  new UserDaoJdbc(new ObjectDaoJdbc<>(sessionManager, dbExecutorForUser, User.class));
+        DbServiceUser dbServiceUser = new DbServiceUserImpl(userDao);
         User userIn = new User(0, 38, "Sergey");
         System.out.println("New Object: " + userIn);
-        long id = dbServiceUser.saveObject(userIn);
-        Optional<User> userOut = dbServiceUser.getObject(id, User.class);
+        long id = dbServiceUser.saveUser(userIn);
+        long id2 = dbServiceUser.saveUser(new User(0, 5, "Vova"));
+        Optional<User> userOut = dbServiceUser.getUser(id);
         userOut.ifPresentOrElse(
-                crUser -> logger.info("Object from DB: {}", crUser),
+                crUser -> logger.info("User from DB: {}", crUser),
+                () -> logger.info("user was not created")
+        );
+        Optional<User> userOut2 = dbServiceUser.getUser(id2);
+        userOut2.ifPresentOrElse(
+                crUser -> logger.info("User from DB: {}", crUser),
                 () -> logger.info("user was not created")
         );
 
         //Account
         System.out.println();
         DbExecutor<Account> dbExecutorForAcc = new DbExecutor<>();
-        ObjectDao<Account> accountDao = new ObjectDaoJdbc<>(sessionManager, dbExecutorForAcc, jdbcMapper, Account.class);
-        DBServiceObject dbServiceAccount = new DbServiceObjectImpl(accountDao);
+        AccountDao accountDao = new AccountDaoJdbc(new ObjectDaoJdbc<>(sessionManager, dbExecutorForAcc, Account.class));
+        DbServiceAccount dbServiceAccount = new DbServiceAccountImpl(accountDao);
         Account accIn = new Account(0, "Debit", 45.321);
         System.out.println("New Object: " + accIn);
-        long idAcc = dbServiceAccount.saveObject(accIn);
-        Optional<Account> accOut = dbServiceAccount.getObject(idAcc, Account.class);
+        long idAcc = dbServiceAccount.saveAccount(accIn);
+        long idAcc2 = dbServiceAccount.saveAccount(new Account(0, "Credit", 100.00));
+        Optional<Account> accOut = dbServiceAccount.getAccount(idAcc);
         accOut.ifPresentOrElse(
-                account -> logger.info("Object from DB: {}", account),
+                account -> logger.info("Account from DB: {}", account),
+                () -> logger.info("account was not created")
+        );
+        Optional<Account> accOut2 = dbServiceAccount.getAccount(idAcc2);
+        accOut2.ifPresentOrElse(
+                account -> logger.info("Account from DB: {}", account),
                 () -> logger.info("account was not created")
         );
 
