@@ -5,26 +5,22 @@ import ru.otus.chernovsa.core.dao.Id;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ObjectMetadata {
     private String objName;
     private Field fieldWithIdAnnotation;
-    private List<Field> fields;
+    private List<Field> fieldWithoutIdAnnotation;
 
-    public List<Field> getFields() {
-        return fields;
+    public ObjectMetadata(Object object) throws Exception {
+        objName = object.getClass().getName().substring(object.getClass().getName().lastIndexOf('.') + 1);
+        initFields(object);
     }
 
-    public void setFields(List<Map<Field, Object>> objectFieldsWithValues) {
-        fields = new ArrayList<>();
-        for (Map<Field, Object> fieldObjectMap : objectFieldsWithValues) {
-            Field field = (Field) fieldObjectMap.keySet().toArray()[0];
-            fields.add(field);
-            if (field.isAnnotationPresent(Id.class)) {
-                fieldWithIdAnnotation = field;
-            }
-        }
+    public List<Field> getFields() {
+        List<Field> result = new ArrayList<>();
+        result.add(fieldWithIdAnnotation);
+        result.addAll(fieldWithoutIdAnnotation);
+        return result;
     }
 
     public Field getFieldWithIdAnnotation() {
@@ -32,20 +28,49 @@ public class ObjectMetadata {
     }
 
     public List<Field> getFieldsForInsert() {
-        List<Field> result = new ArrayList<>();
-        for (Field field : this.fields) {
-            if (!field.isAnnotationPresent(Id.class)) {
-                result.add(field);
-            }
-        }
-        return result;
+        return fieldWithoutIdAnnotation;
     }
 
     public String getObjName() {
         return objName;
     }
 
-    public void setObjName(String objName) {
-        this.objName = objName;
+    private void initFields(Object object) throws Exception {
+        fieldWithoutIdAnnotation = new ArrayList<>();
+        int numIdAnnotation = 0;
+        for (Field field : object.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            Object val = field.get(object);
+            if (!isPrimitiveField(val.getClass())) {
+                reset();
+                throw new ObjectMetadataException("Объект состоит не только из примитивных типов.");
+            }
+            if (field.isAnnotationPresent(Id.class)) {
+                numIdAnnotation++;
+                if (numIdAnnotation > 1) {
+                    reset();
+                    throw new ObjectMetadataException("Объект содержит больше 1 поля с аннотацие Id.");
+                }
+                fieldWithIdAnnotation = field;
+                continue;
+            }
+            fieldWithoutIdAnnotation.add(field);
+        }
+        if (numIdAnnotation < 1) {
+            reset();
+            throw new ObjectMetadataException("Объект НЕ содержит поля с аннотацие Id.");
+        }
+    }
+
+    private boolean isPrimitiveField(Class<?> clazz) {
+        return Number.class.isAssignableFrom(clazz) || String.class.isAssignableFrom(clazz)
+                || Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)
+                || Boolean.class.isAssignableFrom(clazz) || boolean.class.isAssignableFrom(clazz);
+    }
+
+    private void reset() {
+        objName = null;
+        fieldWithIdAnnotation = null;
+        fieldWithoutIdAnnotation = null;
     }
 }

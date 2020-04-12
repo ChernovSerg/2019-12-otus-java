@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface JdbcMapper {
     String getSqlInsert(Object obj) throws JdbcMapperException;
 
-    List<String> getParamsForInsert(Object obj) throws JdbcMapperException;
+    List<Object> getParamsForInsert(Object obj) throws JdbcMapperException;
 
     String getSqlSelect(Class<?> clazz) throws JdbcMapperException;
 

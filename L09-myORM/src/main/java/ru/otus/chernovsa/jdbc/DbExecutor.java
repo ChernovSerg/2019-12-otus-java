@@ -15,11 +15,11 @@ import java.util.function.Function;
 public class DbExecutor<T> {
     private static Logger logger = LoggerFactory.getLogger(DbExecutor.class);
 
-    public long insertRecord(Connection connection, String sql, List<String> params) throws SQLException {
+    public long insertRecord(Connection connection, String sql, List<Object> params) throws SQLException {
         Savepoint savePoint = connection.setSavepoint("savePointName");
         try (PreparedStatement pst = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             for (int idx = 0; idx < params.size(); idx++) {
-                pst.setString(idx + 1, params.get(idx));
+                pst.setObject(idx + 1, params.get(idx));
             }
             pst.executeUpdate();
             try (ResultSet rs = pst.getGeneratedKeys()) {

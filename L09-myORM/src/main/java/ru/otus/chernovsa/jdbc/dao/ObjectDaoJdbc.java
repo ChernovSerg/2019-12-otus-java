@@ -55,7 +55,7 @@ public class ObjectDaoJdbc<T> implements ObjectDao {
                         try {
                             if (resultSet.next()) {
                                 Optional<T> object = jdbcMapper.getObject(resultSet, clazz);
-                                return (T) object.get();
+                                return object.orElse(null);
                             }
                         } catch (SQLException | JdbcMapperException e) {
                             logger.error(e.getMessage(), e);
