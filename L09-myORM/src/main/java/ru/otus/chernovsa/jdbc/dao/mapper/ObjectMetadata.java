@@ -6,14 +6,14 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ObjectMetadata {
-    private String objName;
+public class ObjectMetadata<T> {
+    private Class<T> clazz;
     private Field fieldWithIdAnnotation;
     private List<Field> fieldWithoutIdAnnotation;
 
-    public ObjectMetadata(Object object) throws Exception {
-        objName = object.getClass().getName().substring(object.getClass().getName().lastIndexOf('.') + 1);
-        initFields(object);
+    public ObjectMetadata(Class<T> clazz) throws ObjectMetadataException {
+        this.clazz = clazz;
+        initFields(clazz);
     }
 
     public List<Field> getFields() {
@@ -32,16 +32,14 @@ public class ObjectMetadata {
     }
 
     public String getObjName() {
-        return objName;
+        return clazz.getName().substring(clazz.getName().lastIndexOf('.') + 1);
     }
 
-    private void initFields(Object object) throws Exception {
+    public void initFields(Class<?> clazz) throws ObjectMetadataException {
         fieldWithoutIdAnnotation = new ArrayList<>();
         int numIdAnnotation = 0;
-        for (Field field : object.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            Object val = field.get(object);
-            if (!isPrimitiveField(val.getClass())) {
+        for (Field field : clazz.getDeclaredFields()) {
+            if (!isPrimitiveField(field.getType())) {
                 reset();
                 throw new ObjectMetadataException("Объект состоит не только из примитивных типов.");
             }
@@ -62,14 +60,20 @@ public class ObjectMetadata {
         }
     }
 
+    public Class<T> getClazz() {
+        return clazz;
+    }
+
     private boolean isPrimitiveField(Class<?> clazz) {
-        return Number.class.isAssignableFrom(clazz) || String.class.isAssignableFrom(clazz)
-                || Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)
-                || Boolean.class.isAssignableFrom(clazz) || boolean.class.isAssignableFrom(clazz);
+        return Number.class.isAssignableFrom(clazz)
+                || Character.class.isAssignableFrom(clazz)
+                || Boolean.class.isAssignableFrom(clazz)
+                || String.class.isAssignableFrom(clazz)
+                || clazz.isPrimitive();
     }
 
     private void reset() {
-        objName = null;
+        clazz = null;
         fieldWithIdAnnotation = null;
         fieldWithoutIdAnnotation = null;
     }

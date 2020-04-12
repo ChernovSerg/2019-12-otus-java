@@ -19,23 +19,20 @@ import java.util.stream.Collectors;
 import static ru.otus.chernovsa.jdbc.dao.mapper.SqlRequestType.INSERT_ALL_FIELDS;
 import static ru.otus.chernovsa.jdbc.dao.mapper.SqlRequestType.SELECT_ALL_FIELDS_BY_ID;
 
-public class JdbcMapperImpl implements JdbcMapper {
+public class JdbcMapperImpl<T> implements JdbcMapper<T> {
     private static Logger logger = LoggerFactory.getLogger(JdbcMapperImpl.class);
-    private ObjectMetadata metadata;
+    private ObjectMetadata<T> metadata;
     private SqlRequests sqlRequests = new SqlRequests();
 
+    public JdbcMapperImpl(Class<T> clazz) throws ObjectMetadataException {
+        metadata = new ObjectMetadata<>(clazz);
+    }
+
     @Override
-    public String getSqlInsert(Object object) throws JdbcMapperException {
+    public String getSqlInsert() {
         if (sqlRequests.hasRequest(INSERT_ALL_FIELDS)) {
             return sqlRequests.getRequest(INSERT_ALL_FIELDS);
         }
-
-        if (object == null) {
-            throw new JdbcMapperException("Given object is null");
-        }
-
-        initMetadata(object);
-
         String fieldsForInsert = metadata.getFieldsForInsert().stream().map(Field::getName).collect(Collectors.joining(", "));
         String valuesPlaceHolders = String.join(", ", Collections.nCopies(metadata.getFieldsForInsert().size(), "?"));
         String query = String.format("insert into %s (%s) values(%s)", metadata.getObjName(), fieldsForInsert, valuesPlaceHolders);
@@ -47,9 +44,8 @@ public class JdbcMapperImpl implements JdbcMapper {
     public List<Object> getParamsForInsert(Object object) throws JdbcMapperException {
         List<Object> result = new ArrayList<>();
         if (object == null) {
-            return result;
+            throw  new JdbcMapperException("Given object is null");
         }
-        initMetadata(object);
         for (Field field : metadata.getFieldsForInsert()) {
             try {
                 field.setAccessible(true);
@@ -63,15 +59,9 @@ public class JdbcMapperImpl implements JdbcMapper {
     }
 
     @Override
-    public String getSqlSelect(Class<?> clazz) throws JdbcMapperException {
+    public String getSqlSelect() {
         if (sqlRequests.hasRequest(SELECT_ALL_FIELDS_BY_ID)) {
             return sqlRequests.getRequest(SELECT_ALL_FIELDS_BY_ID);
-        }
-
-        try {
-            initMetadata(clazz.getConstructor().newInstance());
-        } catch (Exception e) {
-            throw new JdbcMapperException(e.getMessage(), e);
         }
         String fieldsForSelect = metadata.getFields().stream().map(Field::getName).collect(Collectors.joining(", "));
         String result = String.format("select %s from %s where %s = ?",
@@ -83,11 +73,10 @@ public class JdbcMapperImpl implements JdbcMapper {
     }
 
     @Override
-    public <T> Optional<T> getObject(ResultSet rs, Class<T> clazz) throws JdbcMapperException {
+    public Optional<T> getObject(ResultSet rs) throws JdbcMapperException {
         T returnObj;
         try {
-            returnObj = clazz.getConstructor().newInstance();
-            initMetadata(returnObj);
+            returnObj = metadata.getClazz().getConstructor().newInstance();
             List<Field> fields = metadata.getFields();
             for (Field field : fields) {
                 String fldName = field.getName();
@@ -104,15 +93,4 @@ public class JdbcMapperImpl implements JdbcMapper {
         }
         return Optional.of(returnObj);
     }
-
-    private void initMetadata(Object object) throws JdbcMapperException {
-        if (metadata == null) {
-            try {
-                metadata = new ObjectMetadata(object);
-            } catch (Exception e) {
-                throw new JdbcMapperException(e.getMessage());
-            }
-        }
-    }
-
 }

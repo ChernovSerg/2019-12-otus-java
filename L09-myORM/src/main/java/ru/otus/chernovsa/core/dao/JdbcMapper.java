@@ -4,12 +4,12 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Optional;
 
-public interface JdbcMapper {
-    String getSqlInsert(Object obj) throws JdbcMapperException;
+public interface JdbcMapper<T> {
+    String getSqlInsert() throws JdbcMapperException;
 
-    List<Object> getParamsForInsert(Object obj) throws JdbcMapperException;
+    String getSqlSelect() throws JdbcMapperException;
 
-    String getSqlSelect(Class<?> clazz) throws JdbcMapperException;
+    List<Object> getParamsForInsert(T obj) throws JdbcMapperException;
 
-    <T> Optional<T> getObject(ResultSet rs, Class<T> clazz) throws JdbcMapperException;
+    Optional<T> getObject(ResultSet rs) throws JdbcMapperException;
 }

@@ -4,10 +4,10 @@ import ru.otus.chernovsa.core.sessionmanager.SessionManager;
 
 import java.util.Optional;
 
-public interface ObjectDao {
-    long saveObject(Object object);
+public interface ObjectDao<T> {
+    long saveObject(T object);
 
-    <T> Optional<T> findById(long id);
+    Optional<T> findById(long id);
 
     SessionManager getSessionManager();
 }

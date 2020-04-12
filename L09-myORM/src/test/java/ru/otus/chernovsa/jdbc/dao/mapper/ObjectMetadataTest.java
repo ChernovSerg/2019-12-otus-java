@@ -15,33 +15,16 @@ class ClassWithPrimitiveFieldsAndIdAnnotation {
     private double dbl;
     private Double dDbl;
     private String str;
-
-    public ClassWithPrimitiveFieldsAndIdAnnotation(int i, double d, Double dd, String s) {
-        this.integ = i;
-        this.dbl = d;
-        this.dDbl = dd;
-        this.str = s;
-    }
 }
 
 class ClassWithObjectFields {
     private ClassWithPrimitiveFieldsAndIdAnnotation i;
     private String s;
-
-    public ClassWithObjectFields(ClassWithPrimitiveFieldsAndIdAnnotation i, String s) {
-        this.i = i;
-        this.s = s;
-    }
 }
 
 class ClassWithoutIdAnnotation {
     private int i;
     private double d;
-
-    public ClassWithoutIdAnnotation(int i, double d) {
-        this.i = i;
-        this.d = d;
-    }
 }
 
 class ClassWithSomeIdAnnotation {
@@ -49,20 +32,15 @@ class ClassWithSomeIdAnnotation {
     private int i;
     @Id
     private double d;
-
-    public ClassWithSomeIdAnnotation(int i, double d) {
-        this.i = i;
-        this.d = d;
-    }
 }
 
 
 public class ObjectMetadataTest {
-    ObjectMetadata meta;
+    ObjectMetadata<?> meta;
 
     public void initMeta() {
         try {
-            meta = new ObjectMetadata(new ClassWithPrimitiveFieldsAndIdAnnotation(0, 1.0, 2.0, "test"));
+            meta = new ObjectMetadata<>(ClassWithPrimitiveFieldsAndIdAnnotation.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,29 +48,21 @@ public class ObjectMetadataTest {
 
     @Test
     public void ObjectWithoutIdAnnotation() {
-        Throwable thrown = catchThrowable(() -> {
-            new ObjectMetadata(new ClassWithoutIdAnnotation(1, 1.0));
-        });
+        Throwable thrown = catchThrowable(() -> new ObjectMetadata<>(ClassWithoutIdAnnotation.class));
         assertThat(thrown).isInstanceOf(ObjectMetadataException.class);
         assertThat(thrown.getMessage()).isEqualTo("Объект НЕ содержит поля с аннотацие Id.");
     }
 
     @Test
     public void ObjectWithObjectFields() {
-        Throwable thrown = catchThrowable(() -> {
-            new ObjectMetadata(new ClassWithObjectFields(
-                    new ClassWithPrimitiveFieldsAndIdAnnotation(1, 1.0, 1.0, "s"), "test")
-            );
-        });
+        Throwable thrown = catchThrowable(() -> new ObjectMetadata<>(ClassWithObjectFields.class));
         assertThat(thrown).isInstanceOf(ObjectMetadataException.class);
         assertThat(thrown.getMessage()).isEqualTo("Объект состоит не только из примитивных типов.");
     }
 
     @Test
     public void ObjectWithSomeIdAnnotation() {
-        Throwable thrown = catchThrowable(() -> {
-            new ObjectMetadata(new ClassWithSomeIdAnnotation(1, 1.0));
-        });
+        Throwable thrown = catchThrowable(() -> new ObjectMetadata<>(ClassWithSomeIdAnnotation.class));
         assertThat(thrown).isInstanceOf(ObjectMetadataException.class);
         assertThat(thrown.getMessage()).isEqualTo("Объект содержит больше 1 поля с аннотацие Id.");
     }

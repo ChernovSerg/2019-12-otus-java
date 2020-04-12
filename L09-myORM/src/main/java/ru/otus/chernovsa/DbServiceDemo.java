@@ -23,10 +23,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Optional;
 
-/**
- * @author sergey
- * created on 03.02.19.
- */
 public class DbServiceDemo {
     private static Logger logger = LoggerFactory.getLogger(DbServiceDemo.class);
 
