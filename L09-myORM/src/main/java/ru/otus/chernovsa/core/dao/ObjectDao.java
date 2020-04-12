@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface ObjectDao<T> {
     long saveObject(T object);
 
-    Optional<T> findById(long id);
+    Optional<T> findById(long id, Class<T> clazz);
 
     SessionManager getSessionManager();
 }

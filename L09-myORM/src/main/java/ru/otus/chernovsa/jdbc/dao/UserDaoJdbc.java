@@ -8,9 +8,9 @@ import ru.otus.chernovsa.core.sessionmanager.SessionManager;
 import java.util.Optional;
 
 public class UserDaoJdbc implements UserDao {
-    private ObjectDao objectDao;
+    private ObjectDao<User> objectDao;
 
-    public UserDaoJdbc(ObjectDao objectDao) {
+    public UserDaoJdbc(ObjectDao<User> objectDao) {
         this.objectDao = objectDao;
     }
 
@@ -21,7 +21,7 @@ public class UserDaoJdbc implements UserDao {
 
     @Override
     public Optional<User> findById(long id) {
-        return objectDao.findById(id);
+        return objectDao.findById(id, User.class);
     }
 
     @Override

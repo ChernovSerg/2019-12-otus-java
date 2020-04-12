@@ -22,35 +22,32 @@ public class ObjectDaoJdbc<T> implements ObjectDao<T> {
 
     private final SessionManagerJdbc sessionManager;
     private final DbExecutor<T> dbExecutor;
-    private final JdbcMapper<T> jdbcMapper;
+    private JdbcMapper<T> jdbcMapper;
 
-    public ObjectDaoJdbc(SessionManagerJdbc sessionManager, DbExecutor<T> dbExecutor, Class<T> clazz) {
+    public ObjectDaoJdbc(SessionManagerJdbc sessionManager, DbExecutor<T> dbExecutor) {
         this.sessionManager = sessionManager;
         this.dbExecutor = dbExecutor;
-        try {
-            this.jdbcMapper = new JdbcMapperImpl<>(clazz);
-        } catch (ObjectMetadataException e) {
-            throw new ObjectDaoException(e);
-        }
     }
 
     @Override
     public long saveObject(T object) {
         try {
+            initJdbcMapper((Class<T>) object.getClass());
             return dbExecutor.insertRecord(
                     getConnection(),
                     jdbcMapper.getSqlInsert(),
                     jdbcMapper.getParamsForInsert(object)
             );
-        } catch (Exception e) {
+        } catch (SQLException | JdbcMapperException | ObjectMetadataException e) {
             logger.error(e.getMessage(), e);
             throw new ObjectDaoException(e);
         }
     }
 
     @Override
-    public Optional<T> findById(long id) {
+    public Optional<T> findById(long id, Class<T> clazz) {
         try {
+            initJdbcMapper(clazz);
             return dbExecutor.selectRecord(getConnection(),
                     jdbcMapper.getSqlSelect(),
                     id,
@@ -79,5 +76,11 @@ public class ObjectDaoJdbc<T> implements ObjectDao<T> {
 
     private Connection getConnection() {
         return sessionManager.getCurrentSession().getConnection();
+    }
+
+    private void initJdbcMapper(Class<T> clazz) throws ObjectMetadataException {
+        if (jdbcMapper == null) {
+            jdbcMapper = new JdbcMapperImpl<>(clazz);
+        }
     }
 }

@@ -36,7 +36,7 @@ public class DbServiceDemo {
         //User
         DbExecutor<User> dbExecutorForUser = new DbExecutor<>();
         System.out.println();
-        UserDao userDao =  new UserDaoJdbc(new ObjectDaoJdbc<>(sessionManager, dbExecutorForUser, User.class));
+        UserDao userDao =  new UserDaoJdbc(new ObjectDaoJdbc<>(sessionManager, dbExecutorForUser));
         DbServiceUser dbServiceUser = new DbServiceUserImpl(userDao);
         User userIn = new User(0, 38, "Sergey");
         System.out.println("New Object: " + userIn);
@@ -56,7 +56,7 @@ public class DbServiceDemo {
         //Account
         System.out.println();
         DbExecutor<Account> dbExecutorForAcc = new DbExecutor<>();
-        AccountDao accountDao = new AccountDaoJdbc(new ObjectDaoJdbc<>(sessionManager, dbExecutorForAcc, Account.class));
+        AccountDao accountDao = new AccountDaoJdbc(new ObjectDaoJdbc<>(sessionManager, dbExecutorForAcc));
         DbServiceAccount dbServiceAccount = new DbServiceAccountImpl(accountDao);
         Account accIn = new Account(0, "Debit", 45.321);
         System.out.println("New Object: " + accIn);
