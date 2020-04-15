@@ -16,8 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.otus.chernovsa.jdbc.dao.mapper.SqlRequestType.INSERT_ALL_FIELDS;
-import static ru.otus.chernovsa.jdbc.dao.mapper.SqlRequestType.SELECT_ALL_FIELDS_BY_ID;
+import static ru.otus.chernovsa.jdbc.dao.mapper.SqlRequestType.*;
 
 public class JdbcMapperImpl<T> implements JdbcMapper<T> {
     private static Logger logger = LoggerFactory.getLogger(JdbcMapperImpl.class);
@@ -35,13 +34,13 @@ public class JdbcMapperImpl<T> implements JdbcMapper<T> {
         }
         String fieldsForInsert = metadata.getFieldsForInsert().stream().map(Field::getName).collect(Collectors.joining(", "));
         String valuesPlaceHolders = String.join(", ", Collections.nCopies(metadata.getFieldsForInsert().size(), "?"));
-        String query = String.format("insert into %s (%s) values(%s)", metadata.getObjName(), fieldsForInsert, valuesPlaceHolders);
+        String query = String.format("insert into %s (%s) values(%s)", metadata.getClassName(), fieldsForInsert, valuesPlaceHolders);
         sqlRequests.put(INSERT_ALL_FIELDS, query);
         return query;
     }
 
     @Override
-    public List<Object> getParamsForInsert(Object object) throws JdbcMapperException {
+    public List<Object> getParamsForInsert(T object) throws JdbcMapperException {
         List<Object> result = new ArrayList<>();
         if (object == null) {
             throw  new JdbcMapperException("Given object is null");
@@ -66,17 +65,48 @@ public class JdbcMapperImpl<T> implements JdbcMapper<T> {
         String fieldsForSelect = metadata.getFields().stream().map(Field::getName).collect(Collectors.joining(", "));
         String result = String.format("select %s from %s where %s = ?",
                 fieldsForSelect,
-                metadata.getObjName(),
+                metadata.getClassName(),
                 metadata.getFieldWithIdAnnotation().getName());
         sqlRequests.put(SELECT_ALL_FIELDS_BY_ID, result);
         return result;
     }
 
     @Override
+    public String getSqlUpdate() {
+        if (sqlRequests.hasRequest(UPDATE_ALL_FIELDS)) {
+            return sqlRequests.getRequest(UPDATE_ALL_FIELDS);
+        }
+        String fieldsForUpdate = metadata.getFieldsForInsert().stream().map(Field::getName)
+                .collect(Collectors.joining(" = ?, ", ""," = ? "));
+        String result = String.format(
+                "update %s set %s where %s = ?",
+                metadata.getClassName(),
+                fieldsForUpdate,
+                metadata.getFieldWithIdAnnotation().getName()
+                );
+        sqlRequests.put(UPDATE_ALL_FIELDS, result);
+        return result;
+    }
+
+    @Override
+    public long getIdValue(T object) throws JdbcMapperException {
+        if (object == null) {
+            throw  new JdbcMapperException("Given object is null");
+        }
+        Field idField = metadata.getFieldWithIdAnnotation();
+        idField.setAccessible(true);
+        try {
+            return Integer.parseInt(idField.get(object).toString());
+        } catch (IllegalAccessException | NumberFormatException e) {
+            throw new JdbcMapperException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public Optional<T> getObject(ResultSet rs) throws JdbcMapperException {
         T returnObj;
         try {
-            returnObj = metadata.getClazz().getConstructor().newInstance();
+            returnObj = metadata.getConstructor().newInstance();
             List<Field> fields = metadata.getFields();
             for (Field field : fields) {
                 String fldName = field.getName();
@@ -87,8 +117,7 @@ public class JdbcMapperImpl<T> implements JdbcMapper<T> {
                 field.setAccessible(true);
                 field.set(returnObj, val);
             }
-        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException
-                | IllegalAccessException | SQLException e) {
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException | SQLException e) {
             throw new JdbcMapperException(e.getMessage(), e);
         }
         return Optional.of(returnObj);

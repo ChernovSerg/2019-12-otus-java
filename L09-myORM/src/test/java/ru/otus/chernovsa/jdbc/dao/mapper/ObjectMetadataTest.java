@@ -15,16 +15,25 @@ class ClassWithPrimitiveFieldsAndIdAnnotation {
     private double dbl;
     private Double dDbl;
     private String str;
+
+    public ClassWithPrimitiveFieldsAndIdAnnotation() {
+    }
 }
 
 class ClassWithObjectFields {
     private ClassWithPrimitiveFieldsAndIdAnnotation i;
     private String s;
+
+    public ClassWithObjectFields() {
+    }
 }
 
 class ClassWithoutIdAnnotation {
     private int i;
     private double d;
+
+    public ClassWithoutIdAnnotation() {
+    }
 }
 
 class ClassWithSomeIdAnnotation {
@@ -32,6 +41,9 @@ class ClassWithSomeIdAnnotation {
     private int i;
     @Id
     private double d;
+
+    public ClassWithSomeIdAnnotation() {
+    }
 }
 
 
@@ -95,6 +107,6 @@ public class ObjectMetadataTest {
     @Test
     public void getObjName() {
         initMeta();
-        assertThat(meta.getObjName()).isEqualTo("ClassWithPrimitiveFieldsAndIdAnnotation");
+        assertThat(meta.getClassName()).isEqualTo("ClassWithPrimitiveFieldsAndIdAnnotation");
     }
 }

@@ -20,6 +20,11 @@ public class UserDaoJdbc implements UserDao {
     }
 
     @Override
+    public long updateUser(User object) {
+        return objectDao.updateObject(object);
+    }
+
+    @Override
     public Optional<User> findById(long id) {
         return objectDao.findById(id, User.class);
     }

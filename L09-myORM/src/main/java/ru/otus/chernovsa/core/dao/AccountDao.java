@@ -11,4 +11,6 @@ public interface AccountDao {
     Optional<Account> findById(long id);
 
     SessionManager getSessionManager();
+
+    long updateAccount(Account object);
 }

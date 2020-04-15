@@ -41,4 +41,19 @@ public class DbExecutor<T> {
             }
         }
     }
+
+    public long updateRecord(Connection connection, String sql, List<Object> params, long id) throws SQLException {
+        Savepoint savepoint = connection.setSavepoint("updatePointName");
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            for (int idx = 0; idx < params.size(); idx++) {
+                pst.setObject(idx + 1, params.get(idx));
+            }
+            pst.setLong(pst.getParameterMetaData().getParameterCount(),id);
+            return pst.executeUpdate();
+        } catch (SQLException e) {
+            connection.rollback(savepoint);
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 }

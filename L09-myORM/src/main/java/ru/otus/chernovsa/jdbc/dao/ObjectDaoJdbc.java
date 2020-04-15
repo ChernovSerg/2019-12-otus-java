@@ -45,6 +45,22 @@ public class ObjectDaoJdbc<T> implements ObjectDao<T> {
     }
 
     @Override
+    public long updateObject(T object) {
+        try {
+            initJdbcMapper((Class<T>) object.getClass());
+            return dbExecutor.updateRecord(
+                    getConnection(),
+                    jdbcMapper.getSqlUpdate(),
+                    jdbcMapper.getParamsForInsert(object),
+                    jdbcMapper.getIdValue(object)
+            );
+        } catch (ObjectMetadataException | JdbcMapperException | SQLException e) {
+            logger.error(e.getMessage(), e);
+            throw new ObjectDaoException(e);
+        }
+    }
+
+    @Override
     public Optional<T> findById(long id, Class<T> clazz) {
         try {
             initJdbcMapper(clazz);

@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface UserDao {
     long saveUser(User object);
 
+    long updateUser(User object);
+
     Optional<User> findById(long id);
 
     SessionManager getSessionManager();

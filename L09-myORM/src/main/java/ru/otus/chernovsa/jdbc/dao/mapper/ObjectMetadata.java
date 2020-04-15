@@ -2,17 +2,24 @@ package ru.otus.chernovsa.jdbc.dao.mapper;
 
 import ru.otus.chernovsa.core.dao.Id;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ObjectMetadata<T> {
-    private Class<T> clazz;
+    private String className;
+    private Constructor<T> constructor;
     private Field fieldWithIdAnnotation;
     private List<Field> fieldWithoutIdAnnotation;
 
     public ObjectMetadata(Class<T> clazz) throws ObjectMetadataException {
-        this.clazz = clazz;
+        this.className = clazz.getName().substring(clazz.getName().lastIndexOf('.') + 1);
+        try {
+            this.constructor = clazz.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new ObjectMetadataException(e.getMessage());
+        }
         initFields(clazz);
     }
 
@@ -31,8 +38,8 @@ public class ObjectMetadata<T> {
         return fieldWithoutIdAnnotation;
     }
 
-    public String getObjName() {
-        return clazz.getName().substring(clazz.getName().lastIndexOf('.') + 1);
+    public String getClassName() {
+        return className;
     }
 
     public void initFields(Class<?> clazz) throws ObjectMetadataException {
@@ -60,8 +67,8 @@ public class ObjectMetadata<T> {
         }
     }
 
-    public Class<T> getClazz() {
-        return clazz;
+    public Constructor<T> getConstructor() {
+        return constructor;
     }
 
     private boolean isPrimitiveField(Class<?> clazz) {
@@ -73,7 +80,8 @@ public class ObjectMetadata<T> {
     }
 
     private void reset() {
-        clazz = null;
+        className = null;
+        constructor = null;
         fieldWithIdAnnotation = null;
         fieldWithoutIdAnnotation = null;
     }

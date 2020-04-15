@@ -10,4 +10,5 @@ public interface DbServiceUser {
 
     Optional<User> getUser(long id);
 
+    long updateUser(User object);
 }

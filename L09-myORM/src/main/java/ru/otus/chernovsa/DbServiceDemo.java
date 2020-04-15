@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.Optional;
 
 public class DbServiceDemo {
@@ -47,6 +48,19 @@ public class DbServiceDemo {
                 crUser -> logger.info("User from DB: {}", crUser),
                 () -> logger.info("user was not created")
         );
+
+        //update User
+        User userFromDB = Objects.requireNonNull(userOut.orElse(null));
+        userFromDB.setName("SeregaUPD");
+        logger.info("The User has a new value for the NAME field: {}",userFromDB);
+        long upd1 = dbServiceUser.updateUser(userFromDB);
+        Optional<User> userUPD = dbServiceUser.getUser(upd1);
+
+        userUPD.ifPresentOrElse(
+                crUser -> logger.info("User from DB: {}", crUser),
+                () -> logger.info("user was not created")
+        );
+
         Optional<User> userOut2 = dbServiceUser.getUser(id2);
         userOut2.ifPresentOrElse(
                 crUser -> logger.info("User from DB: {}", crUser),
@@ -61,12 +75,24 @@ public class DbServiceDemo {
         Account accIn = new Account(0, "Debit", 45.321);
         System.out.println("New Object: " + accIn);
         long idAcc = dbServiceAccount.saveAccount(accIn);
-        long idAcc2 = dbServiceAccount.saveAccount(new Account(0, "Credit", 100.00));
         Optional<Account> accOut = dbServiceAccount.getAccount(idAcc);
         accOut.ifPresentOrElse(
                 account -> logger.info("Account from DB: {}", account),
                 () -> logger.info("account was not created")
         );
+
+        //update Account
+        Account accFromDB = Objects.requireNonNull(accOut.orElse(null));
+        accFromDB.setRest(999.00);
+        logger.info("The Account has a new value for the REST field: {}",accFromDB);
+        long updAcc = dbServiceAccount.updateAccount(accFromDB);
+        Optional<Account> accUPD = dbServiceAccount.getAccount(updAcc);
+        accUPD.ifPresentOrElse(
+                account -> logger.info("Account from DB: {}", account),
+                () -> logger.info("account was not created")
+        );
+
+        long idAcc2 = dbServiceAccount.saveAccount(new Account(0, "Credit", 100.00));
         Optional<Account> accOut2 = dbServiceAccount.getAccount(idAcc2);
         accOut2.ifPresentOrElse(
                 account -> logger.info("Account from DB: {}", account),

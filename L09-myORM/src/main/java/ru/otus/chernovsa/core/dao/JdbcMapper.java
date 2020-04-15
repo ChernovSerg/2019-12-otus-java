@@ -11,5 +11,9 @@ public interface JdbcMapper<T> {
 
     List<Object> getParamsForInsert(T obj) throws JdbcMapperException;
 
+    long getIdValue(T obj) throws JdbcMapperException;
+
     Optional<T> getObject(ResultSet rs) throws JdbcMapperException;
+
+    String getSqlUpdate();
 }

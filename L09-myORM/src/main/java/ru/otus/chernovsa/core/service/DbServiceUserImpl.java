@@ -24,7 +24,6 @@ public class DbServiceUserImpl implements DbServiceUser {
             try {
                 long userId = userDao.saveUser(object);
                 sessionManager.commitSession();
-
                 logger.info("created User with ID: {}", userId);
                 return userId;
             } catch (Exception e) {
@@ -35,6 +34,22 @@ public class DbServiceUserImpl implements DbServiceUser {
         }
     }
 
+    @Override
+    public long updateUser(User object) {
+        try (SessionManager sessionManager = userDao.getSessionManager()) {
+            sessionManager.beginSession();
+            try {
+                long userId = userDao.updateUser(object);
+                sessionManager.commitSession();
+                logger.info("updated User with ID: {}", userId);
+                return userId;
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                sessionManager.rollbackSession();
+                throw new DbServiceException(e);
+            }
+        }
+    }
 
     @Override
     public Optional<User> getUser(long id) {

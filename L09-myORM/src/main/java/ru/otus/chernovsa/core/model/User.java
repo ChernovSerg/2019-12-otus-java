@@ -6,7 +6,7 @@ public class User {
     @Id
     private final long idnt;
     private final int age;
-    private final String name;
+    private String name;
 
     public User() {
         this.idnt = 0;
@@ -30,6 +30,10 @@ public class User {
 
     public int getAge() {
         return age;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

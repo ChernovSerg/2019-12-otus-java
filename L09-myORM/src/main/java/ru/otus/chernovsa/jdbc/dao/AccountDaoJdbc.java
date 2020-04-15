@@ -28,4 +28,9 @@ public class AccountDaoJdbc implements AccountDao {
     public SessionManager getSessionManager() {
         return objectDao.getSessionManager();
     }
+
+    @Override
+    public long updateAccount(Account object) {
+        return objectDao.updateObject(object);
+    }
 }

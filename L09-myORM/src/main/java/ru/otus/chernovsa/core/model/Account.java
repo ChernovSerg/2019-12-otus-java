@@ -7,7 +7,7 @@ public class Account {
     @Id
     private final long no;
     private final String type;
-    private final double rest;
+    private double rest;
 
     public Account() {
         this.no = 0;
@@ -31,6 +31,10 @@ public class Account {
 
     public double getRest() {
         return rest;
+    }
+
+    public void setRest(double rest) {
+        this.rest = rest;
     }
 
     @Override

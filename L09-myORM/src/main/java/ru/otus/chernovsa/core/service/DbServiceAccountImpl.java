@@ -36,6 +36,23 @@ public class DbServiceAccountImpl implements DbServiceAccount {
     }
 
     @Override
+    public long updateAccount(Account object) {
+        try (SessionManager sessionManager = accountDao.getSessionManager()) {
+            sessionManager.beginSession();
+            try {
+                long accId = accountDao.updateAccount(object);
+                sessionManager.commitSession();
+                logger.info("updated Account with ID: {}", accId);
+                return accId;
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                sessionManager.rollbackSession();
+                throw new DbServiceException(e);
+            }
+        }
+    }
+
+    @Override
     public Optional<Account> getAccount(long id) {
         try (SessionManager sessionManager = accountDao.getSessionManager()) {
             sessionManager.beginSession();
