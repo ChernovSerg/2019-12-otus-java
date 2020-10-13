@@ -44,7 +44,7 @@
         <spring-framework-bom.version>5.2.2.RELEASE</spring-framework-bom.version>
         <commons-io.version>2.6</commons-io.version>
         <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
-        <junit-version>4.12</junit-version>
+        <junit-version>4.13.1</junit-version>
         <assertj-core-version>3.14.0</assertj-core-version>
         <logback-classic.version>1.2.3</logback-classic.version>
 
